@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+<style>
+.tic-tac-toe {
+	float: left;
+	width: 100px;
+	height: 100px;
+	border: 2px solid #eee;
+}
+
+.tic-tac-toe.black { background: #000; }
+.tic-tac-toe.white { background: green; }
+
+#TL, #CL, #BL { clear: left; }
+</style>
+</head>
+
+<body>
+<div class="tic-tac-toe" id="TL">&nbsp;</div>
+<div class="tic-tac-toe" id="TM">&nbsp;</div>
+<div class="tic-tac-toe" id="TR">&nbsp;</div>
+<div class="tic-tac-toe" id="CL">&nbsp;</div>
+<div class="tic-tac-toe" id="CM">&nbsp;</div>
+<div class="tic-tac-toe" id="CR">&nbsp;</div>
+<div class="tic-tac-toe" id="BL">&nbsp;</div>
+<div class="tic-tac-toe" id="BM">&nbsp;</div>
+<div class="tic-tac-toe" id="BR">&nbsp;</div>
+
+<script type="text/javascript" src="tictactoe.js"></script>
+<script type="text/javascript">
+var game = new TicTacToe('tic-tac-toe');
+</script>
+</body>
+</html>
