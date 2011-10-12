@@ -90,8 +90,6 @@ TicTacToe.prototype.click = function(element) {
 }
 
 TicTacToe.prototype.store = function(id, color) {
-  console.log('store()');
-  console.log(id);
   this.squareMap[id] = color;
   
   var element = document.getElementById(id);
@@ -154,22 +152,18 @@ TicTacToe.prototype.store = function(id, color) {
 }
 
 TicTacToe.prototype.changePlayer = function() {
-  console.log('changePlayer()');
   this.currentPlayer = this.currentPlayer == this.WHITE ? this.BLACK : this.WHITE;
-  console.log(this.currentPlayer);
+  
   if (!this.againstHuman && this.currentPlayer == this.computerColor) {
     this.play();
   }
 }
 
 TicTacToe.prototype.play = function() {
-  console.log('play()');
   var freePositions;
       
   // Defensive first
   freePositions = this.defensivePlacement();
-  
-  console.log(freePositions);
   
   if (freePositions.must) {
     this.store(freePositions.must, this.currentPlayer);
@@ -189,7 +183,6 @@ TicTacToe.prototype.play = function() {
 }
 
 TicTacToe.prototype.defensivePlacement = function() {
-  console.log('defensivePlacement()');
   var pos = { 'must': null, 'possible': [] };
   
   // Top
@@ -340,13 +333,44 @@ TicTacToe.prototype.defensivePlacement = function() {
 }
 
 TicTacToe.prototype.win = function() {
+	console.log("WIN");
 	// Top
-	if (this.topRow.length == 3 && this.squareMap[this.topRow[0]] == this.squareMap[this.topRow[1]] == this.squareMap[this.topRow[2]]) {
+	if (this.topRow.length == 3 && this.squareMap[this.topRow[0]] == this.squareMap[this.topRow[1]] && this.squareMap[this.topRow[0]] == this.squareMap[this.topRow[2]]) {
 		alert(this.squareMap[this.topRow[0]] + ' wins !!');
 	}
 	
-	// Middle
-	if (this.centerRow.length == 3 && this.squareMap[this.centerRow[0]] == this.squareMap[this.centerRow[1]] == this.squareMap[this.centerRow[2]]) {
+	// Center
+	if (this.centerRow.length == 3 && this.squareMap[this.centerRow[0]] == this.squareMap[this.centerRow[1]] && this.squareMap[this.centerRow[0]] == this.squareMap[this.centerRow[2]]) {
 		alert(this.squareMap[this.centerRow[0]] + ' wins !!');
+	}
+	
+	// Bottom
+	if (this.bottomRow.length == 3 && this.squareMap[this.bottomRow[0]] == this.squareMap[this.bottomRow[1]] && this.squareMap[this.bottomRow[0]] == this.squareMap[this.bottomRow[2]]) {
+		alert(this.squareMap[this.bottomRow[0]] + ' wins !!');
+	}
+	
+	// Left
+	if (this.leftCol.length == 3 && this.squareMap[this.leftCol[0]] == this.squareMap[this.leftCol[1]] && this.squareMap[this.leftCol[0]] == this.squareMap[this.leftCol[2]]) {
+		alert(this.squareMap[this.leftCol[0]] + ' wins !!');
+	}
+	
+	// Middle
+	if (this.middleCol.length == 3 && this.squareMap[this.middleCol[0]] == this.squareMap[this.middleCol[1]] && this.squareMap[this.middleCol[0]] == this.squareMap[this.middleCol[2]]) {
+		alert(this.squareMap[this.middleCol[0]] + ' wins !!');
+	}
+	
+	// Right
+	if (this.rightCol.length == 3 && this.squareMap[this.rightCol[0]] == this.squareMap[this.rightCol[1]] && this.squareMap[this.rightCol[0]] == this.squareMap[this.rightCol[2]]) {
+		alert(this.squareMap[this.rightCol[0]] + ' wins !!');
+	}
+	
+	// Diagonal1
+	if (this.diagonal1.length == 3 && this.squareMap[this.diagonal1[0]] == this.squareMap[this.diagonal1[1]] && this.squareMap[this.diagonal1[0]] == this.squareMap[this.diagonal1[2]]) {
+		alert(this.squareMap[this.diagonal1[0]] + ' wins !!');
+	}
+	
+	// Diagonal2
+	if (this.diagonal2.length == 3 && this.squareMap[this.diagonal2[0]] == this.squareMap[this.diagonal2[1]] && this.squareMap[this.diagonal2[0]] == this.squareMap[this.diagonal2[2]]) {
+		alert(this.squareMap[this.diagonal2[0]] + ' wins !!');
 	}
 }
