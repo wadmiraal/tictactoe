@@ -4,6 +4,21 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Untitled Document</title>
 <style>
+body {
+	font-family: sans-serif;	
+}
+
+#game {
+	width: 312px;
+	margin: 20px auto;
+	overflow: hidden;
+}
+
+#score {
+	float: left;
+	height: 30px;
+}
+
 .tic-tac-toe {
 	float: left;
 	width: 100px;
@@ -11,27 +26,31 @@
 	border: 2px solid #eee;
 }
 
-.tic-tac-toe.black { background: #000; }
-.tic-tac-toe.white { background: green; }
+.tic-tac-toe.cross { background: url(img/cross.png) left top no-repeat; }
+.tic-tac-toe.circle { background:  url(img/circle.png) left top no-repeat; }
 
 #TL, #CL, #BL { clear: left; }
 </style>
 </head>
 
 <body>
-<div class="hello tic-tac-toe there" id="TL">&nbsp;</div>
-<div class="hello tic-tac-toe there" id="TM">&nbsp;</div>
-<div class="hello tic-tac-toe there" id="TR">&nbsp;</div>
-<div class="hello tic-tac-toe there" id="CL">&nbsp;</div>
-<div class="hello tic-tac-toe there" id="CM">&nbsp;</div>
-<div class="hello tic-tac-toe there" id="CR">&nbsp;</div>
-<div class="hello tic-tac-toe there" id="BL">&nbsp;</div>
-<div class="hello tic-tac-toe there" id="BM">&nbsp;</div>
-<div class="hello tic-tac-toe there" id="BR">&nbsp;</div>
+	<div id="game">
+		<div id="score">Cross: <span id="score-cross"></span>, Circle: <span id="score-circle"></span></div>
+		
+		<div class="hello tic-tac-toe there" id="TL">&nbsp;</div>
+		<div class="hello tic-tac-toe there" id="TM">&nbsp;</div>
+		<div class="hello tic-tac-toe there" id="TR">&nbsp;</div>
+		<div class="hello tic-tac-toe there" id="CL">&nbsp;</div>
+		<div class="hello tic-tac-toe there" id="CM">&nbsp;</div>
+		<div class="hello tic-tac-toe there" id="CR">&nbsp;</div>
+		<div class="hello tic-tac-toe there" id="BL">&nbsp;</div>
+		<div class="hello tic-tac-toe there" id="BM">&nbsp;</div>
+		<div class="hello tic-tac-toe there" id="BR">&nbsp;</div>
+	</div>
 
-<script type="text/javascript" src="tictactoe.js"></script>
-<script type="text/javascript">
-var game = new TicTacToe('tic-tac-toe');
-</script>
+	<script type="text/javascript" src="tictactoe.js"></script>
+	<script type="text/javascript">
+	var game = new TicTacToe({'cssClass': 'tic-tac-toe', 'againstHuman': false, 'scoreWrappers': { 'cross': 'score-cross', 'circle': 'score-circle' } });
+	</script>
 </body>
 </html>

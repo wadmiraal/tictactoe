@@ -9,22 +9,30 @@
 /**
  * Constructor
  *
- * @param {String} cssClass
- * 				The CSS class given to the 9 square elements
- * 				that will constitute the game grid
- * @param {Boolean} againstHuman
- * 				If false, will play agains the AI.
+ * @param {Object} options
+ * 				The options map. Must contain the 'cssClass' property for
+ * 				finding the squares. Optional properties:
+ * 				 - 'againstHuman': defaults to false. If true, AI will be turned off
+ * 				 - 'scoreWrappers': can contain 2 properties:
+ * 				 		- 'cross': the css ID for the cross player
+ * 				 		- 'circle': the css ID for the circle player
  */
-function TicTacToe(cssClass, againstHuman) {
-  this.cssClass = cssClass;
-  this.againstHuman = againstHuman ? true : false;
-  this.WHITE = 'white';
-  this.BLACK = 'black';
-  this.currentPlayer = Math.round(Math.random()) ? this.WHITE : this.BLACK;
-  this.computerColor = Math.round(Math.random()) ? this.WHITE : this.BLACK;
-	this.score = {};
-	this.score[this.WHITE] = 0;
-	this.score[this.BLACK] = 0;
+function TicTacToe(options) {
+	if (!options.cssClass) {
+		throw Error('Must provide a CSS Class for the squares !');
+	}
+
+  this.cssClass = options.cssClass;
+  this.againstHuman = options.againstHuman ? true : false;
+  this.CROSS = 'cross';
+  this.CIRCLE = 'circle';
+	this.scoreWrapper = {
+		'cross':  options.scoreWrappers.cross  ? document.getElementById(options.scoreWrappers.cross)  : null,
+		'circle': options.scoreWrappers.circle ? document.getElementById(options.scoreWrappers.circle) : null
+	};
+	this.score = { 'cross': 0, 'circle': 0 };
+  this.currentPlayer = Math.round(Math.random()) ? this.CROSS : this.CIRCLE;
+  this.computerColor = Math.round(Math.random()) ? this.CROSS : this.CIRCLE;
 	this.lines = [
 		['TL', 'TM', 'TR'],
 		['CL', 'CM', 'CR'],
@@ -39,18 +47,12 @@ function TicTacToe(cssClass, againstHuman) {
   this.getSquares();
 	
 	this.reset();
-	
-	this.arrays = [this.topRow, this.centerRow, this.bottomRow, this.leftCol, this.middleCol, this.rightCol, this.diagonal1, this.diagonal2];
-  
-  if (this.currentPlayer == this.computerColor) {
-    this.play();
-  }
 }
 
 /**
  * Reset the game.
  */
-TicTacToe.prototype.reset = function() {
+TicTacToe.prototype.reset = function(wait) {
 	this.round     = 0;
   this.topRow    = [];
   this.centerRow = [];
@@ -61,14 +63,19 @@ TicTacToe.prototype.reset = function() {
   this.diagonal1 = [];
   this.diagonal2 = [];
   this.squareMap = {};
+	this.arrays = [this.topRow, this.centerRow, this.bottomRow, this.leftCol, this.middleCol, this.rightCol, this.diagonal1, this.diagonal2];
 	
-	var oldClass, regExp = new RegExp('(?:^|\\s)(' + this.WHITE + '|' + this.BLACK + ')(?:$|\\s)');
+	var oldClass, regExp = new RegExp('(?:^|\\s)(' + this.CROSS + '|' + this.CIRCLE + ')(?:$|\\s)');
 	
 	for (var i = 0; i < 9; ++i) {
 		oldClass = this.squares[i].getAttribute('class');
 		
 		this.squares[i].setAttribute('class', oldClass.replace(regExp, ''));
 	}
+	
+	if (this.currentPlayer == this.computerColor) {
+    this.play();
+  }
 }
 
 /**
@@ -126,9 +133,9 @@ TicTacToe.prototype.addEventListeners = function() {
  */
 TicTacToe.prototype.click = function(element) {
   if (!this.squareMap[element.id]) {    
-    this.store(element.id, this.currentPlayer);
-    
-    this.changePlayer();
+    if (this.store(element.id, this.currentPlayer)) {
+			this.changePlayer();
+		}
   }
   else {
     alert('already played');
@@ -148,13 +155,16 @@ TicTacToe.prototype.click = function(element) {
  * 				The id of the clicked square. Must be of "TL", "CL", "BL", "TM", etc
  * @param {String} color
  * 				The player that clicked on the square
+ *
+ * @returns {Boolean}
+ * 				True if the game can go on, false otherwise
  */
 TicTacToe.prototype.store = function(id, color) {
   this.squareMap[id] = color;
   
   var element = document.getElementById(id);
-  element.setAttribute('class' , element.getAttribute('class') + ' ' + color);
-  
+	element.setAttribute('class' , element.getAttribute('class') + ' ' + color);
+	
 	var linesToCheck;
 	
   switch(id) {
@@ -225,13 +235,20 @@ TicTacToe.prototype.store = function(id, color) {
       this.diagonal1.push(id);
 			
 			linesToCheck = [this.bottomRow, this.rightCol, this.diagonal1];
-      break;    
+      break;
+		
+		default:
+			console.log("No valid id received !\nId: " + id);
+			break;
   }
 	
 	this.round++;
 	
 	if (this.round > 4) {
-		this.win(linesToCheck);
+		return !this.win(linesToCheck);
+	}
+	else {
+		return true;
 	}
 }
 
@@ -242,7 +259,7 @@ TicTacToe.prototype.store = function(id, color) {
  * @see TicTacToe.play()
  */
 TicTacToe.prototype.changePlayer = function() {
-  this.currentPlayer = this.currentPlayer == this.WHITE ? this.BLACK : this.WHITE;
+  this.currentPlayer = this.currentPlayer == this.CROSS ? this.CIRCLE : this.CROSS;
   
   if (!this.againstHuman && this.currentPlayer == this.computerColor) {
     this.play();
@@ -257,29 +274,38 @@ TicTacToe.prototype.changePlayer = function() {
  * @see TicTacToe.offensivePlacement()
  */
 TicTacToe.prototype.play = function() {
-  // Defensive/win placement
-  var pos = this.defensivePlacement();
-  
-  if (pos.must || pos.win) {
+	var chosen, pos = this.defensivePlacement(), placeOffensively = false;
+	
+	if (pos.possible.length == 0) console.log(pos);
+	
+	if (pos.must || pos.win) {
+		// Defensive/win placement
 		if (pos.win) {
-			this.store(pos.win, this.currentPlayer);
+			chosen = pos.win;
 		}
 		else {
-			this.store(pos.must, this.currentPlayer);
-		
-			this.changePlayer();
+			chosen = pos.must;
 		}
-    
-    return;
-  }
+	}
+	else if (placeOffensively) {
+		// Offensive placement
+		this.offensivePlacement(pos.possible);
+	}
+	else {
+		// Passive placement. Go to a random free square
+		console.log(Math.round(Math.random() * pos.possible.length - 1));
+		console.log(pos);
+		chosen = pos.possible[Math.round(Math.random() * pos.possible.length - 1)];
+		console.log(chosen);
+		
+		if (chosen == undefined) {
+			console.log(this.arrays);
+		}
+	}
   
-  // Offensive placement
-  this.offensivePlacement(pos.possible);
-  
-  // Passive placement. Go to a random free square
-  this.store(pos.possible[Math.round(Math.random() * pos.possible.length)], this.currentPlayer);
-  
-  this.changePlayer();  
+  if (this.store(chosen, this.currentPlayer)) {
+		this.changePlayer();
+	}
 }
 
 /**
@@ -299,7 +325,7 @@ TicTacToe.prototype.play = function() {
 TicTacToe.prototype.defensivePlacement = function() {
   var pos = { 'must': null, 'win': null, 'possible': [] };
   
-  for (var i = 0; i < 8; ++i) {
+  for (var i = 0, len = this.arrays.length; i < len; ++i) {
 		// If there are exactly 2 elements in this line and both have the same color, this is a win|must position
 		if (this.arrays[i].length == 2 && this.squareMap[this.arrays[i][0]] == this.squareMap[this.arrays[i][1]]) {
 			for (var j = 0; j < 3; ++j) {
@@ -312,7 +338,7 @@ TicTacToe.prototype.defensivePlacement = function() {
 						
 						return pos;
 					}
-					else {
+					else if(this.squareMap[this.arrays[i][0]]) {
 						pos.must = this.lines[i][j];
 					}
 				}
@@ -320,6 +346,7 @@ TicTacToe.prototype.defensivePlacement = function() {
 		}
 		// Else, these are only possible placements
 		else if (this.arrays[i].length <= 2) {
+			console.log(this.arrays);
 			for (var j = 0; j < 3; ++j) {
 				if (!this.squareMap[this.lines[i][j]]) {
 					pos.possible.push(this.lines[i][j]);
@@ -332,7 +359,7 @@ TicTacToe.prototype.defensivePlacement = function() {
 }
 
 /**
- * TODO: Figure out an algorythm to place inteligently
+ * TODO: Figure out an algorithm to place inteligently
  *
  * @see TicTacToe.play()
  * @see TicTacToe.defensivePlacement()
@@ -357,6 +384,9 @@ TicTacToe.prototype.offensivePlacement = function(possible) {
  *
  * @param {Array} linesToCheck
  * 				The lines that contain the last checked square
+ *
+ * @returns {Boolean}
+ * 				True in case of a win, false if not
  */
 TicTacToe.prototype.win = function(linesToCheck) {	
 	for (var i = 0, len = linesToCheck.length; i < len; ++i) {
@@ -366,9 +396,24 @@ TicTacToe.prototype.win = function(linesToCheck) {
 			
 			this.score[this.squareMap[linesToCheck[i][0]]]++;
 			
+			if (this.scoreWrapper[this.squareMap[linesToCheck[i][0]]]) {
+				this.scoreWrapper[this.squareMap[linesToCheck[i][0]]].innerHTML = this.score[this.squareMap[linesToCheck[i][0]]];
+			}
+			
 			this.reset();
 			
-			return;
+			return true;
 		}
 	}
+	
+	// Is this a tie ?
+	if (this.round == 9) {
+		alert("Draw");
+		
+		this.changePlayer();
+		
+		this.reset();
+	}
+	
+	return false;
 }
