@@ -4,4 +4,7 @@ Just a simple tic-tac-toe game in javascript. The only goal is to have some fun 
 
 # What's next
 
-Finish the game (for a start), and try to improve the logic, the performance, the AI, etc.
+1. Finish the game (for a start)
+2. Improve the logic (continue with the array approach, or go for a matrix ?)
+3. Improve the performance (maybe extend the .prototype only once, better loops, drier code)
+4. Improve the AI (implement "strategies")
