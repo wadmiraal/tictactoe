@@ -19,15 +19,15 @@ body {
 	height: 30px;
 }
 
-.tic-tac-toe {
+.tictactoe-square {
 	float: left;
 	width: 100px;
 	height: 100px;
 	border: 2px solid #eee;
 }
 
-.tic-tac-toe.cross { background: url(img/cross.png) left top no-repeat; }
-.tic-tac-toe.circle { background:  url(img/circle.png) left top no-repeat; }
+.tictactoe-cross { background: url(img/cross.png) left top no-repeat; }
+.tictactoe-circle { background:  url(img/circle.png) left top no-repeat; }
 
 #TL, #CL, #BL { clear: left; }
 </style>
@@ -35,22 +35,22 @@ body {
 
 <body>
 	<div id="game">
-		<div id="score">Cross: <span id="score-cross"></span>, Circle: <span id="score-circle"></span></div>
+		<div id="score">Cross: <span id="tictactoe-score-cross"></span>, Circle: <span id="tictactoe-score-circle"></span></div>
 		
-		<div class="hello tic-tac-toe there" id="TL">&nbsp;</div>
-		<div class="hello tic-tac-toe there" id="TM">&nbsp;</div>
-		<div class="hello tic-tac-toe there" id="TR">&nbsp;</div>
-		<div class="hello tic-tac-toe there" id="CL">&nbsp;</div>
-		<div class="hello tic-tac-toe there" id="CM">&nbsp;</div>
-		<div class="hello tic-tac-toe there" id="CR">&nbsp;</div>
-		<div class="hello tic-tac-toe there" id="BL">&nbsp;</div>
-		<div class="hello tic-tac-toe there" id="BM">&nbsp;</div>
-		<div class="hello tic-tac-toe there" id="BR">&nbsp;</div>
+		<div class="tictactoe-square" id="TL">&nbsp;</div>
+		<div class="tictactoe-square" id="TM">&nbsp;</div>
+		<div class="tictactoe-square" id="TR">&nbsp;</div>
+		<div class="tictactoe-square" id="CL">&nbsp;</div>
+		<div class="tictactoe-square" id="CM">&nbsp;</div>
+		<div class="tictactoe-square" id="CR">&nbsp;</div>
+		<div class="tictactoe-square" id="BL">&nbsp;</div>
+		<div class="tictactoe-square" id="BM">&nbsp;</div>
+		<div class="tictactoe-square" id="BR">&nbsp;</div>
 	</div>
 
 	<script type="text/javascript" src="tictactoe.js"></script>
 	<script type="text/javascript">
-	var game = new TicTacToe({'cssClass': 'tic-tac-toe', 'againstHuman': false, 'scoreWrappers': { 'cross': 'score-cross', 'circle': 'score-circle' } });
+	var game = new TicTacToe();
 	</script>
 </body>
 </html>

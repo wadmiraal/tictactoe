@@ -9,30 +9,30 @@
 /**
  * Constructor
  *
- * @param {Object} options
- * 				The options map. Must contain the 'cssClass' property for
- * 				finding the squares. Optional properties:
- * 				 - 'againstHuman': defaults to false. If true, AI will be turned off
- * 				 - 'scoreWrappers': can contain 2 properties:
- * 				 		- 'cross': the css ID for the cross player
- * 				 		- 'circle': the css ID for the circle player
+ * @param {Boolean} againstHuman
+ * 				(optional) A boolean specifying if the player is playing against the
+ * 				AI or against another human. Defaults to false.
  */
-function TicTacToe(options) {
-	if (!options.cssClass) {
-		throw Error('Must provide a CSS Class for the squares !');
-	}
-
-  this.cssClass = options.cssClass;
-  this.againstHuman = options.againstHuman ? true : false;
+function TicTacToe(againstHuman) {	
+	// Make sure we get a boolean
+  this.againstHuman = !!againstHuman;
+	
   this.CROSS = 'cross';
   this.CIRCLE = 'circle';
+	
 	this.scoreWrapper = {
-		'cross':  options.scoreWrappers.cross  ? document.getElementById(options.scoreWrappers.cross)  : null,
-		'circle': options.scoreWrappers.circle ? document.getElementById(options.scoreWrappers.circle) : null
+		'cross':  document.getElementById('tictactoe-score-cross')  || null,
+		'circle': document.getElementById('tictactoe-score-circle') || null
 	};
+	
 	this.score = { 'cross': 0, 'circle': 0 };
+	
   this.currentPlayer = Math.round(Math.random()) ? this.CROSS : this.CIRCLE;
-  this.computerColor = Math.round(Math.random()) ? this.CROSS : this.CIRCLE;
+	
+	if (!this.againstHuman) {
+		this.computerColor = Math.round(Math.random()) ? this.CROSS : this.CIRCLE;
+	}
+	
 	this.lines = [
 		['TL', 'TM', 'TR'],
 		['CL', 'CM', 'CR'],
@@ -52,7 +52,7 @@ function TicTacToe(options) {
 /**
  * Reset the game.
  */
-TicTacToe.prototype.reset = function(wait) {
+TicTacToe.prototype.reset = function() {
 	this.round     = 0;
   this.topRow    = [];
   this.centerRow = [];
@@ -65,7 +65,7 @@ TicTacToe.prototype.reset = function(wait) {
   this.squareMap = {};
 	this.arrays = [this.topRow, this.centerRow, this.bottomRow, this.leftCol, this.middleCol, this.rightCol, this.diagonal1, this.diagonal2];
 	
-	var oldClass, regExp = new RegExp('(?:^|\\s)(' + this.CROSS + '|' + this.CIRCLE + ')(?:$|\\s)');
+	var oldClass, regExp = new RegExp('(?:^|\\s)(tictactoe-' + this.CROSS + '|tictactoe-' + this.CIRCLE + ')(?:$|\\s)');
 	
 	for (var i = 0; i < 9; ++i) {
 		oldClass = this.squares[i].getAttribute('class');
@@ -73,7 +73,7 @@ TicTacToe.prototype.reset = function(wait) {
 		this.squares[i].setAttribute('class', oldClass.replace(regExp, ''));
 	}
 	
-	if (this.currentPlayer == this.computerColor) {
+	if (!this.againstHuman && this.currentPlayer == this.computerColor) {
     this.play();
   }
 }
@@ -85,20 +85,20 @@ TicTacToe.prototype.getSquares = function() {
   var squares;
   
   if (document.getElementsByClassName) {
-    squares = document.getElementsByClassName(this.cssClass);
+    squares = document.getElementsByClassName('tictactoe-square');
   }
   else {
-    var hasClassName = new RegExp('(?:^|\\s)' + this.cssClass + '(?:$|\\s)'),
+    var hasClassName = new RegExp('(?:^|\\s)tictactoe-square(?:$|\\s)'),
         allElements  = document.getElementsByTagName('*')
-        element,
-        elementClass;
+        element = null,
+        elementClass = '';
     
     squares = new Array();
 		
     for (var i = 0; (element = allElements[i]) != null; i++) {
 			elementClass = element.className;
       
-			if (elementClass && elementClass.indexOf(className) != -1 && hasClassName.test(elementClass)) {
+			if (elementClass && elementClass.indexOf('tictactoe-square') != -1 && hasClassName.test(elementClass)) {
 				squares.push(element);
 			}
 		}
@@ -107,6 +107,8 @@ TicTacToe.prototype.getSquares = function() {
   this.squares = squares;
   
   this.addEventListeners();
+	
+	return this.squares;
 }
 
 /**
@@ -114,10 +116,22 @@ TicTacToe.prototype.getSquares = function() {
  */
 TicTacToe.prototype.addEventListeners = function() {
   for (var i = 0, len = this.squares.length; i < len; ++i) {
-    (function(ticTacToe, square) {
-      square.addEventListener('click', function() {
-        ticTacToe.click(this);
-      }, false);
+		// We need a reference to this. Pass it as game.
+    (function(game, square) {
+			var callback = function() {
+        game.click(this);
+      };
+			
+			if (square.addEventListener) {
+				square.addEventListener('click', callback, false);
+			}
+			else if (square.attachEvent) {
+				square.attachEvent('click', callback, false);
+			}
+			else {
+				throw new Error('Could not attach event listeners');
+			}
+			
     })(this, this.squares[i])
   }
 }
@@ -128,20 +142,21 @@ TicTacToe.prototype.addEventListeners = function() {
  *
  * @see TicTacToe.store()
  *
- * @param {Object} element
+ * @param {HTMLElement} element
  * 				The clicked square
  */
 TicTacToe.prototype.click = function(element) {
   if (!this.squareMap[element.id]) {    
     if (this.store(element.id, this.currentPlayer)) {
 			this.changePlayer();
+			
+			return true;
 		}
   }
   else {
-    alert('already played');
+    // Already played
+		return false;
   }
-  
-  return false;
 }
 
 /**
@@ -160,11 +175,17 @@ TicTacToe.prototype.click = function(element) {
  * 				True if the game can go on, false otherwise
  */
 TicTacToe.prototype.store = function(id, color) {
+	// If this square was already played, abort
+	if (!!this.squareMap[id]) {
+		return false;
+	}
+	
   this.squareMap[id] = color;
   
   var element = document.getElementById(id);
-	element.setAttribute('class' , element.getAttribute('class') + ' ' + color);
-	
+
+	element.setAttribute('class' , element.getAttribute('class') + ' tictactoe-' + color);
+
 	var linesToCheck;
 	
   switch(id) {
@@ -238,7 +259,7 @@ TicTacToe.prototype.store = function(id, color) {
       break;
 		
 		default:
-			console.log("No valid id received !\nId: " + id);
+			throw new Error("No valid id received !\nId: " + id);
 			break;
   }
 	
@@ -276,8 +297,6 @@ TicTacToe.prototype.changePlayer = function() {
 TicTacToe.prototype.play = function() {
 	var chosen, pos = this.defensivePlacement(), placeOffensively = false;
 	
-	if (pos.possible.length == 0) console.log(pos);
-	
 	if (pos.must || pos.win) {
 		// Defensive/win placement
 		if (pos.win) {
@@ -289,18 +308,15 @@ TicTacToe.prototype.play = function() {
 	}
 	else if (placeOffensively) {
 		// Offensive placement
-		this.offensivePlacement(pos.possible);
+		chosen = this.offensivePlacement(pos.possible);
 	}
 	else {
 		// Passive placement. Go to a random free square
-		console.log(Math.round(Math.random() * pos.possible.length - 1));
-		console.log(pos);
 		chosen = pos.possible[Math.round(Math.random() * pos.possible.length - 1)];
-		console.log(chosen);
-		
-		if (chosen == undefined) {
-			console.log(this.arrays);
-		}
+	}
+	
+	if (!chosen) {
+		chosen = pos.possible[0];
 	}
   
   if (this.store(chosen, this.currentPlayer)) {
@@ -346,7 +362,6 @@ TicTacToe.prototype.defensivePlacement = function() {
 		}
 		// Else, these are only possible placements
 		else if (this.arrays[i].length <= 2) {
-			console.log(this.arrays);
 			for (var j = 0; j < 3; ++j) {
 				if (!this.squareMap[this.lines[i][j]]) {
 					pos.possible.push(this.lines[i][j]);
@@ -371,7 +386,7 @@ TicTacToe.prototype.defensivePlacement = function() {
  * 				The id of the square to play
  */
 TicTacToe.prototype.offensivePlacement = function(possible) {
-	var position;
+	var position = possible[0];
 	
 	return position;
 }
