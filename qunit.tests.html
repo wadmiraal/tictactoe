@@ -27,7 +27,7 @@
     });
     
     test("Try playing/winning", function() {
-      var linesToCheck = [game.topRow, game.bottomRow, game.centerRow, game.leftCol, game.middleCol, game.rightCol, game.diagonal1, game.diagonal2];
+      var linesToCheck = [['TL', 'TM', 'TR'], ['TL', 'CL', 'BL'], ['TL', 'CM', 'BR']];
       
       ok(!game.win(linesToCheck), "Should not have a winner yet.");
       

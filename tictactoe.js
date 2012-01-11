@@ -33,17 +33,6 @@ function TicTacToe(againstHuman) {
 		this.computerColor = Math.round(Math.random()) ? this.CROSS : this.CIRCLE;
 	}
 	
-	this.lines = [
-		['TL', 'TM', 'TR'],
-		['CL', 'CM', 'CR'],
-		['BL', 'BM', 'BR'],
-		['TL', 'CL', 'BL'],
-		['TM', 'CM', 'BM'],
-		['TR', 'CR', 'BR'],
-		['TL', 'CM', 'BR'],
-		['TR', 'CM', 'BL']
-	];
-	
   this.getSquares();
 	
 	this.reset();
@@ -53,17 +42,8 @@ function TicTacToe(againstHuman) {
  * Reset the game.
  */
 TicTacToe.prototype.reset = function() {
-	this.round     = 0;
-  this.topRow    = [];
-  this.centerRow = [];
-  this.bottomRow = [];
-  this.leftCol   = [];
-  this.middleCol = [];
-  this.rightCol  = [];
-  this.diagonal1 = [];
-  this.diagonal2 = [];
-  this.squareMap = {};
-	this.arrays = [this.topRow, this.centerRow, this.bottomRow, this.leftCol, this.middleCol, this.rightCol, this.diagonal1, this.diagonal2];
+	this.round = 0;
+	this.squareMap = {};
 	
 	var oldClass, regExp = new RegExp('(?:^|\\s)(tictactoe-' + this.CROSS + '|tictactoe-' + this.CIRCLE + ')(?:$|\\s)');
 	
@@ -126,7 +106,7 @@ TicTacToe.prototype.addEventListeners = function() {
 				square.addEventListener('click', callback, false);
 			}
 			else if (square.attachEvent) {
-				square.attachEvent('click', callback, false);
+				square.attachEvent('onclick', callback, false);
 			}
 			else {
 				throw new Error('Could not attach event listeners');
@@ -182,80 +162,46 @@ TicTacToe.prototype.store = function(id, color) {
 	
   this.squareMap[id] = color;
   
-  var element = document.getElementById(id);
+  var element = document.getElementById(id),
+			linesToCheck = [];
 
 	element.setAttribute('class' , element.getAttribute('class') + ' tictactoe-' + color);
-
-	var linesToCheck;
 	
   switch(id) {
-    case 'TL':
-      this.topRow.push(id);
-      this.leftCol.push(id);
-      this.diagonal1.push(id);
-			
-			linesToCheck = [this.topRow, this.leftCol, this.diagonal1];
+    case 'TL':			
+			linesToCheck = [['TL', 'TM', 'TR'], ['TL', 'CL', 'BL'], ['TL', 'CM', 'BR']];
       break;
     
     case 'TM':
-      this.topRow.push(id);
-      this.middleCol.push(id);
-			
-			linesToCheck = [this.topRow, this.middleCol];
+      linesToCheck = [['TL', 'TM', 'TR'], ['TM', 'CM', 'BM']];
       break;
     
     case 'TR':
-      this.topRow.push(id);
-      this.rightCol.push(id);
-      this.diagonal2.push(id);
-			
-			linesToCheck = [this.topRow, this.rightCol, this.diagonal2];
+      linesToCheck = [['TL', 'TM', 'TR'], ['TR', 'CR', 'BR'], ['TR', 'CM', 'BL']];
       break;
     
     case 'CL':
-      this.centerRow.push(id);
-      this.leftCol.push(id);
-			
-			linesToCheck = [this.centerRow, this.leftCol];
+      linesToCheck = [['TL', 'CL', 'BL'], ['CL', 'CM', 'CR']];
       break;
     
     case 'CM':
-      this.centerRow.push(id);
-      this.middleCol.push(id);
-      this.diagonal1.push(id);
-      this.diagonal2.push(id);
-			
-			linesToCheck = [this.centerRow, this.middleCol, this.diagonal1, this.diagonal2];
+      linesToCheck = [['CL', 'CM', 'CR'], ['TM', 'CM', 'BM'], ['TL', 'CM', 'BR'], ['TR', 'CM', 'BL']];
       break;
     
     case 'CR':
-      this.centerRow.push(id);
-      this.rightCol.push(id);
-			
-			linesToCheck = [this.centerRow, this.rightCol];
+      linesToCheck = [['TR', 'CR', 'BR'], ['CL', 'CM', 'CR']];
       break;
     
     case 'BL':
-      this.bottomRow.push(id);
-      this.leftCol.push(id);
-      this.diagonal2.push(id);
-			
-			linesToCheck = [this.bottomRow, this.leftCol, this.diagonal2];
+      linesToCheck = [['BL', 'BM', 'BR'], ['TL', 'CL', 'BL'], ['TR', 'CM', 'BL']];
       break;
     
     case 'BM':
-      this.bottomRow.push(id);
-      this.middleCol.push(id);
-			
-			linesToCheck = [this.bottomRow, this.middleCol];
+      linesToCheck = [['BL', 'BM', 'BR'], ['TM', 'CM', 'BM']];
       break;
     
     case 'BR':
-      this.bottomRow.push(id);
-      this.rightCol.push(id);
-      this.diagonal1.push(id);
-			
-			linesToCheck = [this.bottomRow, this.rightCol, this.diagonal1];
+      linesToCheck = [['BL', 'BM', 'BR'], ['TR', 'CR', 'BR'], ['TL', 'CM', 'BR']];
       break;
 		
 		default:
@@ -295,8 +241,10 @@ TicTacToe.prototype.changePlayer = function() {
  * @see TicTacToe.offensivePlacement()
  */
 TicTacToe.prototype.play = function() {
-	var chosen, pos = this.defensivePlacement(), placeOffensively = false;
-	
+	var chosen = null,
+			pos = this.defensivePlacement(),
+			placeOffensively = false;
+			
 	if (pos.must || pos.win) {
 		// Defensive/win placement
 		if (pos.win) {
@@ -315,10 +263,12 @@ TicTacToe.prototype.play = function() {
 		chosen = pos.possible[Math.round(Math.random() * pos.possible.length - 1)];
 	}
 	
+  console.log(pos);
+	console.log(chosen);
 	if (!chosen) {
-		chosen = pos.possible[0];
+		throw new Error("Error determining where to play !");
 	}
-  
+	
   if (this.store(chosen, this.currentPlayer)) {
 		this.changePlayer();
 	}
@@ -339,38 +289,122 @@ TicTacToe.prototype.play = function() {
  * 				An object with properties: 'win', 'must' and 'possible'
  */
 TicTacToe.prototype.defensivePlacement = function() {
-  var pos = { 'must': null, 'win': null, 'possible': [] };
-  
-  for (var i = 0, len = this.arrays.length; i < len; ++i) {
-		// If there are exactly 2 elements in this line and both have the same color, this is a win|must position
-		if (this.arrays[i].length == 2 && this.squareMap[this.arrays[i][0]] == this.squareMap[this.arrays[i][1]]) {
-			for (var j = 0; j < 3; ++j) {
-				// Check wich position is still free
-				if (!this.squareMap[this.lines[i][j]]) {
-					// If this is our color, we win. Else, we'll have to place here
-					// to avoid losing
-					if (this.squareMap[this.arrays[i][0]] == this.computerColor) {
-						pos.win = this.lines[i][j];
+  var pos = {
+		must: null,
+		win: null,
+		possible: []
+	};
+	
+	var linesToCheck = [
+		['TL', 'TM', 'TR'],
+		['TL', 'CL', 'BL'],
+		['TL', 'CM', 'BR'],
+		['TM', 'CM', 'BM'],
+		['TR', 'CR', 'BR'],
+		['TR', 'CM', 'BL'],
+		['CL', 'CM', 'CR'],
+		['BL', 'BM', 'BR']
+	];
+	
+	var square1, square2, square3;
+	
+	for (var i = 0, len = linesToCheck.length; i < len; ++i) {
+		// If there are exactly 2 elements in this line and both have the same color,
+		// this is a win|must position
+		
+		// Store squares for code readability
+		square1 = this.squareMap[linesToCheck[i][0]] || null;
+		square2 = this.squareMap[linesToCheck[i][1]] || null;
+		square3 = this.squareMap[linesToCheck[i][2]] || null;
+		
+		// If there are at least 2 squares in this line, check further
+		if ((square1 && square2) || (square1 && square3) || (square2 && square3)) {
+			if (square1) {
+				if (square1 === square2 && !square3) {
+					// Add square 3
+					if (square1 === this.computerColor) {
+						pos.win = linesToCheck[i][2];
 						
+						// Must place here anyway. Abort and return
 						return pos;
 					}
-					else if(this.squareMap[this.arrays[i][0]]) {
-						pos.must = this.lines[i][j];
+					else {
+						pos.must = linesToCheck[i][2];
+					}
+				}
+				else if (square1 === square3 && !square2) {
+					// Add square 2
+					if (square1 === this.computerColor) {
+						pos.win = linesToCheck[i][1];
+						
+						// Must place here anyway. Abort and return
+						return pos;
+					}
+					else {
+						pos.must = linesToCheck[i][1];
+					}
+				}
+				else if ((square1 !== square2 && square2 && !square3) || (square1 !== square3 && square3 && !square2)) {
+					// These are possible positions
+					if (!square2) {
+						pos.possible.push(linesToCheck[i][1]);
+					}
+					
+					if (!square3) {
+						pos.possible.push(linesToCheck[i][2]);
 					}
 				}
 			}
-		}
-		// Else, these are only possible placements
-		else if (this.arrays[i].length <= 2) {
-			for (var j = 0; j < 3; ++j) {
-				if (!this.squareMap[this.lines[i][j]]) {
-					pos.possible.push(this.lines[i][j]);
+			else if (square2) {
+				if (square2 === square3 && !square1) {
+					// Add square 1
+					if (square2 === this.computerColor) {
+						pos.win = linesToCheck[i][0];
+						
+						// Must place here anyway. Abort and return
+						return pos;
+					}
+					else {
+						pos.must = linesToCheck[i][0];
+					}
 				}
+				else if (square2 !== square3 && square3 && !square1) {
+					// These are possible positions
+					pos.possible.push(linesToCheck[i][0]);
+				}
+			}
+			else {
+				// These are possible positions
+				if (!square1) {
+					pos.possible.push(linesToCheck[i][0]);
+				}
+				
+				if (!square2) {
+					pos.possible.push(linesToCheck[i][1]);
+				}
+				
+				if (!square3) {
+					pos.possible.push(linesToCheck[i][2]);
+				}
+			}
+		}
+		else {
+			// These are possible positions
+			if (!square1) {
+				pos.possible.push(linesToCheck[i][0]);
+			}
+			
+			if (!square2) {
+				pos.possible.push(linesToCheck[i][1]);
+			}
+			
+			if (!square3) {
+				pos.possible.push(linesToCheck[i][2]);
 			}
 		}
 	}
-  
-  return pos
+	
+	return pos;
 }
 
 /**
@@ -394,8 +428,7 @@ TicTacToe.prototype.offensivePlacement = function(possible) {
 /**
  * Check all lines for a win.
  * Checks all lines that contain the last selected square. If
- * the line contains 3 squares, check their color. If all 3 have
- * the same color, we have a winner.
+ * the line contains 3 squares and all have the same color, we have a winner.
  *
  * @param {Array} linesToCheck
  * 				The lines that contain the last checked square
@@ -403,16 +436,20 @@ TicTacToe.prototype.offensivePlacement = function(possible) {
  * @returns {Boolean}
  * 				True in case of a win, false if not
  */
-TicTacToe.prototype.win = function(linesToCheck) {	
+TicTacToe.prototype.win = function(linesToCheck) {
+	var color;
+	
 	for (var i = 0, len = linesToCheck.length; i < len; ++i) {
-		// If a line has 3 elements and all elements have the same color, there's a winner
-		if (linesToCheck[i].length == 3 && this.squareMap[linesToCheck[i][0]] == this.squareMap[linesToCheck[i][1]] && this.squareMap[linesToCheck[i][0]] == this.squareMap[linesToCheck[i][2]]) {
-			alert(this.squareMap[linesToCheck[i][0]] + ' wins !!');
+		color = this.squareMap[linesToCheck[i][0]];
+		
+		// If all three squares are the same, and color is defined we have a winner
+		if (color && this.squareMap[linesToCheck[i][1]] === color && this.squareMap[linesToCheck[i][2]] === color) {
+			alert(color + ' wins !!');
 			
-			this.score[this.squareMap[linesToCheck[i][0]]]++;
+			this.score[color]++;
 			
-			if (this.scoreWrapper[this.squareMap[linesToCheck[i][0]]]) {
-				this.scoreWrapper[this.squareMap[linesToCheck[i][0]]].innerHTML = this.score[this.squareMap[linesToCheck[i][0]]];
+			if (this.scoreWrapper[color]) {
+				this.scoreWrapper[color].innerHTML = this.score[color];
 			}
 			
 			this.reset();
@@ -422,12 +459,12 @@ TicTacToe.prototype.win = function(linesToCheck) {
 	}
 	
 	// Is this a tie ?
-	if (this.round == 9) {
+	if (this.round === 9) {
 		alert("Draw");
 		
-		this.changePlayer();
-		
 		this.reset();
+		
+		return true;
 	}
 	
 	return false;
