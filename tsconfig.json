@@ -1,0 +1,11 @@
+{
+  "files": ["src/main.ts"],
+  "compilerOptions": {
+    "outDir": "build",
+    "module": "CommonJS",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "skipLibCheck": true,
+    "target": "es2015"
+  }
+}
