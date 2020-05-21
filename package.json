@@ -4,7 +4,7 @@
   "description": "Just a simple tic-tac-toe game in javascript. The only goal is to have some fun and improve my javascript skills :-).",
   "main": "index.js",
   "scripts": {
-    "build": "npx tsc && npx browserify build/main.js -o dist/build.js",
+    "build": "npx tsc && npx browserify -g uglifyify build/main.js -o dist/build.js",
     "test": "jest --coverage"
   },
   "repository": {
@@ -25,7 +25,9 @@
     "jest-canvas-mock": "^2.2.0",
     "jsdom": "^16.2.2",
     "ts-jest": "^26.0.0",
-    "typescript": "^3.9.3"
+    "typescript": "^3.9.3",
+    "uglify": "^0.1.5",
+    "uglifyify": "^5.0.2"
   },
   "jest": {
     "preset": "ts-jest",
