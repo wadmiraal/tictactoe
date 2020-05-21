@@ -17,7 +17,10 @@ export default class Game {
   }
 
   handleClick(x: number, y: number) {
-    if (this.board.hasWinner()) {
+    if (
+      this.board.hasWinner() ||
+      GridHelper.getAvailableSquareIds(this.board).length === 0
+    ) {
       this.reset();
       return;
     }

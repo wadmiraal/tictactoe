@@ -21,12 +21,19 @@ it("correctly handles clicking squares", () => {
   const boardMock = (Board as jest.Mock).mock.instances[0];
   const canvasMock = (Canvas as jest.Mock).mock.instances[0];
 
-  boardMock.getSquare = jest.fn(() => "X");
+  boardMock.getSquare = jest.fn((id: number) => {
+    if (id === 1) {
+      return "X";
+    }
+    if (id === 9) {
+      return "O";
+    }
+  });
+
   game.handleClick(0, 0);
   expect(boardMock.setSquare).toHaveBeenCalledWith(1);
   expect(canvasMock.renderCross).toHaveBeenCalledWith(0, 0);
 
-  boardMock.getSquare = jest.fn(() => "O");
   game.handleClick(2, 2);
   expect(boardMock.setSquare).toHaveBeenCalledWith(9);
   expect(canvasMock.renderCircle).toHaveBeenCalledWith(2, 2);
@@ -61,13 +68,24 @@ it("correctly handles winning conditions", () => {
   expect(canvasMock.renderWinningLine).toHaveBeenCalledWith(0, 0, 2, 2);
 });
 
-it("correctly resets if game is over", () => {
+it("correctly resets if game is won", () => {
   const game = new Game(document.createElement("div"));
   const boardMock = (Board as jest.Mock).mock.instances[0];
   const canvasMock = (Canvas as jest.Mock).mock.instances[0];
 
   boardMock.hasWinner = jest.fn(() => true);
 
+  game.handleClick(0, 0);
+  expect(boardMock.reset).toHaveBeenCalled();
+  expect(canvasMock.reset).toHaveBeenCalled();
+});
+
+it("correctly resets if game is a draw", () => {
+  const game = new Game(document.createElement("div"));
+  const boardMock = (Board as jest.Mock).mock.instances[0];
+  const canvasMock = (Canvas as jest.Mock).mock.instances[0];
+
+  boardMock.getSquare = jest.fn(() => "X");
   game.handleClick(0, 0);
   expect(boardMock.reset).toHaveBeenCalled();
   expect(canvasMock.reset).toHaveBeenCalled();
