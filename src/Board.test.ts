@@ -24,20 +24,34 @@ it("can get/set square values", () => {
     // Cannot override an existing square.
     board.setSquare(1);
   }).toThrow();
+
+  // Test reset.
+  board.reset();
+  expect(board.getSquare(1)).toBeUndefined();
 });
 
 it("can detect a winning situation", () => {
   const board = new Board();
 
   expect(board.hasWinner()).toBe(false);
+  expect(board.getWinner()).toBeUndefined();
+  expect(board.getWinningLine()).toBeUndefined();
 
   board
-    .setSquare(0) // X
-    .setSquare(1) // O
-    .setSquare(2) // X
-    .setSquare(3) // O
-    .setSquare(4) // X
-    .setSquare(5) // O
-    .setSquare(8); // X;
+    .setSquare(1) // X
+    .setSquare(2) // O
+    .setSquare(3) // X
+    .setSquare(4) // O
+    .setSquare(5) // X
+    .setSquare(6) // O
+    .setSquare(9); // X;
   expect(board.hasWinner()).toBe(true);
+  expect(board.getWinner()).toBe("X");
+  expect(board.getWinningLine()).toEqual([1, 5, 9]);
+
+  // Test reset.
+  board.reset();
+  expect(board.hasWinner()).toBe(false);
+  expect(board.getWinner()).toBeUndefined();
+  expect(board.getWinningLine()).toBeUndefined();
 });

@@ -16,8 +16,8 @@ class Board {
         return (this.lastValue = nextValue);
     }
     getSquare(n) {
-        if (n < 0 || n > 8) {
-            throw new RangeError(`${n} is out of bounds (can only be 0 - 8)`);
+        if (n < 1 || n > 9) {
+            throw new RangeError(`${n} is out of bounds (can only be 1 - 9)`);
         }
         return this.squares[n];
     }
@@ -32,11 +32,11 @@ class Board {
     }
     hasWinner() {
         const lines = [
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7, 8],
-            [0, 4, 8],
-            [6, 4, 2],
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+            [1, 5, 9],
+            [7, 5, 3],
         ];
         for (const line of lines) {
             const result = line.reduce((acc, squareId, i, squareIds) => {
@@ -51,10 +51,24 @@ class Board {
                 return valueB !== undefined && valueA === valueB;
             }, false);
             if (result) {
+                this.winningLine = line;
                 return true;
             }
         }
         return false;
+    }
+    getWinner() {
+        if (this.winningLine) {
+            return this.getSquare(this.winningLine[0]);
+        }
+    }
+    getWinningLine() {
+        return this.winningLine;
+    }
+    reset() {
+        this.squares = new Array(9);
+        this.winningLine = undefined;
+        return this;
     }
 }
 exports.default = Board;
@@ -62,37 +76,87 @@ exports.default = Board;
 },{}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const GRID_SIZE = 100;
+const PADDING = 10;
 class Canvas {
-    constructor(element, board) {
+    constructor(element) {
         this.element = element;
-        this.board = board;
-        board.setSquare(1);
-        board.setSquare(5);
         this.init();
-        this.render();
     }
-    init() {
-        const canvas = document.createElement("canvas");
-        canvas.setAttribute("width", "300");
-        canvas.setAttribute("height", "300");
-        this.element.append(canvas);
-        this.context = canvas.getContext("2d");
+    onClick(onClickCallback) {
+        this.onClickCallback = onClickCallback;
     }
-    render() {
-        const gridSize = 100;
-        let squareId = 0;
+    reset() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.renderGrid();
+    }
+    renderGrid() {
+        this.context.lineWidth = 1;
+        this.context.strokeStyle = "black";
         for (let y = 0; y < 3; y++) {
             for (let x = 0; x < 3; x++) {
-                const xPos = x * gridSize;
-                const yPos = y * gridSize;
-                this.context.strokeRect(xPos, yPos, gridSize, gridSize);
-                const square = this.board.getSquare(squareId);
-                if (square !== undefined) {
-                    this.context.fillText(square, xPos - gridSize / 2, yPos - gridSize / 2);
-                }
-                squareId++;
+                const [xPos, yPos] = this.getPositions(x, y);
+                this.context.strokeRect(xPos + 1, yPos + 1, GRID_SIZE, GRID_SIZE);
             }
         }
+    }
+    renderCircle(x, y) {
+        const [xPos, yPos] = this.getPositions(x, y);
+        const radius = (GRID_SIZE - PADDING * 2) / 2;
+        this.context.beginPath();
+        this.context.lineWidth = 3;
+        this.context.strokeStyle = "blue";
+        this.context.arc(xPos + radius + PADDING, yPos + radius + PADDING, radius, 0, 2 * Math.PI);
+        this.context.stroke();
+        this.context.closePath();
+    }
+    renderCross(x, y) {
+        const [xPos, yPos] = this.getPositions(x, y);
+        const xLineStartPos = xPos + PADDING;
+        const xLineEndPos = xPos + GRID_SIZE - PADDING;
+        const yLineStartPos = yPos + PADDING;
+        const yLineEndPos = yPos + GRID_SIZE - PADDING;
+        this.context.beginPath();
+        this.context.lineWidth = 3;
+        this.context.strokeStyle = "orange";
+        this.context.moveTo(xLineStartPos, yLineStartPos);
+        this.context.lineTo(xLineEndPos, yLineEndPos);
+        this.context.moveTo(xLineStartPos, yLineEndPos);
+        this.context.lineTo(xLineEndPos, yLineStartPos);
+        this.context.stroke();
+        this.context.closePath();
+    }
+    renderWinningLine(startX, startY, endX, endY) {
+        const halfGridSize = GRID_SIZE / 2;
+        const xLineStartPos = Number(startX) * GRID_SIZE + halfGridSize;
+        const yLineStartPos = Number(startY) * GRID_SIZE + halfGridSize;
+        const xLineEndPos = Number(endX) * GRID_SIZE + halfGridSize;
+        const yLineEndPos = Number(endY) * GRID_SIZE + halfGridSize;
+        this.context.beginPath();
+        this.context.lineWidth = 4;
+        this.context.strokeStyle = "red";
+        this.context.moveTo(xLineStartPos, yLineStartPos);
+        this.context.lineTo(xLineEndPos, yLineEndPos);
+        this.context.stroke();
+        this.context.closePath();
+    }
+    init() {
+        this.canvas = document.createElement("canvas");
+        this.canvas.setAttribute("width", "302");
+        this.canvas.setAttribute("height", "302");
+        this.element.append(this.canvas);
+        this.context = this.canvas.getContext("2d");
+        this.canvas.addEventListener("click", this.handleClick.bind(this));
+    }
+    handleClick(e) {
+        if (this.onClickCallback) {
+            const x = Math.floor((e.clientX - this.canvas.offsetLeft) / GRID_SIZE);
+            const y = Math.floor((e.clientY - this.canvas.offsetTop) / GRID_SIZE);
+            this.onClickCallback(x, y);
+        }
+    }
+    getPositions(x, y) {
+        return [Number(x) * GRID_SIZE, Number(y) * GRID_SIZE];
     }
 }
 exports.default = Canvas;
@@ -102,6 +166,64 @@ exports.default = Canvas;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Board_1 = require("./Board");
 const Canvas_1 = require("./Canvas");
-const canvas = new Canvas_1.default(document.getElementById("game"), new Board_1.default());
+const GRID = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+];
+class Game {
+    constructor(element) {
+        this.board = new Board_1.default();
+        this.canvas = new Canvas_1.default(element);
+        this.canvas.onClick(this.handleClick.bind(this));
+        this.canvas.renderGrid();
+    }
+    handleClick(x, y) {
+        if (this.board.hasWinner()) {
+            this.reset();
+            return;
+        }
+        try {
+            this.board.setSquare(GRID[y][x]);
+            const squareValue = this.board.getSquare(GRID[y][x]);
+            if (squareValue === "X") {
+                this.canvas.renderCross(x, y);
+            }
+            else if (squareValue === "O") {
+                this.canvas.renderCircle(x, y);
+            }
+            if (this.board.hasWinner()) {
+                const winningLine = this.board.getWinningLine();
+                let startPos;
+                let endPos;
+                for (const y in GRID) {
+                    for (const x in GRID[y]) {
+                        const squareId = GRID[y][x];
+                        if (winningLine[0] === squareId) {
+                            startPos = { x, y };
+                        }
+                        else if (winningLine[2] === squareId) {
+                            endPos = { x, y };
+                        }
+                    }
+                }
+                this.canvas.renderWinningLine(Number(startPos.x), Number(startPos.y), Number(endPos.x), Number(endPos.y));
+            }
+        }
+        catch (e) {
+        }
+    }
+    reset() {
+        this.board.reset();
+        this.canvas.reset();
+    }
+}
+exports.default = Game;
 
-},{"./Board":1,"./Canvas":2}]},{},[3]);
+},{"./Board":1,"./Canvas":2}],4:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Game_1 = require("./Game");
+const canvas = new Game_1.default(document.getElementById("game"));
+
+},{"./Game":3}]},{},[4]);

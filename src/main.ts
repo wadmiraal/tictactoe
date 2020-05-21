@@ -1,4 +1,3 @@
-import Board from "./Board";
-import Canvas from "./Canvas";
+import Game from "./Game";
 
-const canvas = new Canvas(document.getElementById("game"), new Board());
+const canvas = new Game(document.getElementById("game"));
