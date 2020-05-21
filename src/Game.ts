@@ -1,18 +1,16 @@
+import AI from "./AI";
 import Board from "./Board";
 import Canvas from "./Canvas";
-
-const GRID = [
-  [1, 2, 3],
-  [4, 5, 6],
-  [7, 8, 9],
-];
+import Grid from "./Grid";
 
 export default class Game {
+  private ai?: AI;
   private board: Board;
   private canvas: Canvas;
 
-  constructor(element: HTMLElement) {
+  constructor(element: HTMLElement, againstAI = false) {
     this.board = new Board();
+    this.ai = againstAI ? new AI(this.board) : undefined;
     this.canvas = new Canvas(element);
     this.canvas.onClick(this.handleClick.bind(this));
     this.canvas.renderGrid();
@@ -24,9 +22,17 @@ export default class Game {
       return;
     }
 
+    this.chooseSquare(x, y);
+
+    if (this.ai) {
+      this.chooseSquare(...Grid.fromSquareId(this.ai.pickSquare()));
+    }
+  }
+
+  private chooseSquare(x: number, y: number) {
     try {
-      this.board.setSquare(GRID[y][x]);
-      const squareValue = this.board.getSquare(GRID[y][x]);
+      this.board.setSquare(Grid.toSquareId(x, y));
+      const squareValue = this.board.getSquare(Grid.toSquareId(x, y));
       if (squareValue === "X") {
         this.canvas.renderCross(x, y);
       } else if (squareValue === "O") {
@@ -35,18 +41,11 @@ export default class Game {
 
       if (this.board.hasWinner()) {
         const winningLine = this.board.getWinningLine();
-        let startPos;
-        let endPos;
-        for (const y in GRID) {
-          for (const x in GRID[y]) {
-            const squareId = GRID[y][x];
-            if (winningLine[0] === squareId) {
-              startPos = { x, y };
-            } else if (winningLine[2] === squareId) {
-              endPos = { x, y };
-            }
-          }
-        }
+        let [x, y] = Grid.fromSquareId(winningLine[0]);
+        const startPos = { x, y };
+        [x, y] = Grid.fromSquareId(winningLine[2]);
+        const endPos = { x, y };
+
         this.canvas.renderWinningLine(
           Number(startPos.x),
           Number(startPos.y),

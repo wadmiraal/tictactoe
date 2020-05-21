@@ -1,7 +1,9 @@
+import AI from "./AI";
 import Board from "./Board";
 import Canvas from "./Canvas";
 import Game from "./Game";
 
+jest.mock("./AI");
 jest.mock("./Board");
 jest.mock("./Canvas");
 
@@ -28,6 +30,18 @@ it("correctly handles clicking squares", () => {
   game.handleClick(2, 2);
   expect(boardMock.setSquare).toHaveBeenCalledWith(9);
   expect(canvasMock.renderCircle).toHaveBeenCalledWith(2, 2);
+});
+
+it("correctly handles AI turn", () => {
+  const game = new Game(document.createElement("div"), true);
+  const spy = jest.spyOn<any, any>(game, "chooseSquare");
+  const aiMock = (AI as jest.Mock).mock.instances[0];
+
+  aiMock.pickSquare = jest.fn(() => 1);
+  game.handleClick(1, 1);
+  expect(aiMock.pickSquare).toHaveBeenCalled();
+  expect(spy).toHaveBeenCalledWith(1, 1);
+  expect(spy).toHaveBeenCalledWith(0, 0);
 });
 
 it("correctly handles winning conditions", () => {

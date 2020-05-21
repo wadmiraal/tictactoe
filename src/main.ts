@@ -1,3 +1,3 @@
 import Game from "./Game";
 
-const canvas = new Game(document.getElementById("game"));
+new Game(document.getElementById("game"), true);

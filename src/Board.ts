@@ -1,16 +1,16 @@
-export type SquareValue = "X" | "O";
+export type Player = "X" | "O";
 
 export default class Board {
-  private squares: SquareValue[];
-  private lastValue: SquareValue;
+  private squares: Player[];
+  private lastValue: Player;
   private winningLine?: number[];
 
   constructor() {
     this.squares = new Array(9);
   }
 
-  private getNextValue() {
-    let nextValue: SquareValue;
+  getCurrentPlayer() {
+    let nextValue: Player;
     if (this.lastValue === undefined) {
       nextValue = "X";
     } else {
@@ -19,7 +19,7 @@ export default class Board {
     return (this.lastValue = nextValue);
   }
 
-  getSquare(n: number): SquareValue | undefined {
+  getSquare(n: number): Player | undefined {
     if (n < 1 || n > 9) {
       throw new RangeError(`${n} is out of bounds (can only be 1 - 9)`);
     }
@@ -28,7 +28,7 @@ export default class Board {
 
   setSquare(n: number) {
     if (this.getSquare(n) === undefined) {
-      this.squares[n] = this.getNextValue();
+      this.squares[n] = this.getCurrentPlayer();
     } else {
       throw new Error(`${n} already has a value`);
     }
@@ -69,7 +69,7 @@ export default class Board {
     return false;
   }
 
-  getWinner(): SquareValue | undefined {
+  getWinner(): Player | undefined {
     if (this.winningLine) {
       return this.getSquare(this.winningLine[0]);
     }
