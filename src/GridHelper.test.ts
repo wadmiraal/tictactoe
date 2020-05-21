@@ -1,16 +1,16 @@
 import Board from "./Board";
-import Grid from "./Grid";
+import GridHelper from "./GridHelper";
 
 jest.mock("./Board");
 
 it("converts from coordinates to squareId", () => {
-  expect(Grid.toSquareId(0, 0)).toBe(1);
-  expect(Grid.toSquareId(2, 2)).toBe(9);
+  expect(GridHelper.toSquareId(0, 0)).toBe(1);
+  expect(GridHelper.toSquareId(2, 2)).toBe(9);
 });
 
 it("converts from squareId to coords", () => {
-  expect(Grid.fromSquareId(1)).toEqual([0, 0]);
-  expect(Grid.fromSquareId(9)).toEqual([2, 2]);
+  expect(GridHelper.fromSquareId(1)).toEqual([0, 0]);
+  expect(GridHelper.fromSquareId(9)).toEqual([2, 2]);
 });
 
 it("fetches all unplayed squares from a board", () => {
@@ -19,5 +19,5 @@ it("fetches all unplayed squares from a board", () => {
   boardMock.getSquare = jest.fn((id: number) =>
     [1, 2, 3, 4, 5].includes(id) ? "X" : undefined
   );
-  expect(Grid.getAvailableSquareIds(board)).toEqual([6, 7, 8, 9]);
+  expect(GridHelper.getAvailableSquareIds(board)).toEqual([6, 7, 8, 9]);
 });

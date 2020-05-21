@@ -6,7 +6,7 @@ const GRID = [
   [7, 8, 9],
 ];
 
-const Grid = {
+const GridHelper = {
   fromSquareId: (squareId: number): [number, number] => {
     for (const y in GRID) {
       for (const x in GRID[y]) {
@@ -35,4 +35,4 @@ const Grid = {
   },
 };
 
-export default Grid;
+export default GridHelper;

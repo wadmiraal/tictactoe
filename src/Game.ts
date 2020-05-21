@@ -1,7 +1,7 @@
 import AI from "./AI";
 import Board from "./Board";
 import Canvas from "./Canvas";
-import Grid from "./Grid";
+import GridHelper from "./GridHelper";
 
 export default class Game {
   private ai?: AI;
@@ -25,14 +25,14 @@ export default class Game {
     this.chooseSquare(x, y);
 
     if (this.ai) {
-      this.chooseSquare(...Grid.fromSquareId(this.ai.pickSquare()));
+      this.chooseSquare(...GridHelper.fromSquareId(this.ai.pickSquare()));
     }
   }
 
   private chooseSquare(x: number, y: number) {
     try {
-      this.board.setSquare(Grid.toSquareId(x, y));
-      const squareValue = this.board.getSquare(Grid.toSquareId(x, y));
+      this.board.setSquare(GridHelper.toSquareId(x, y));
+      const squareValue = this.board.getSquare(GridHelper.toSquareId(x, y));
       if (squareValue === "X") {
         this.canvas.renderCross(x, y);
       } else if (squareValue === "O") {
@@ -41,17 +41,9 @@ export default class Game {
 
       if (this.board.hasWinner()) {
         const winningLine = this.board.getWinningLine();
-        let [x, y] = Grid.fromSquareId(winningLine[0]);
-        const startPos = { x, y };
-        [x, y] = Grid.fromSquareId(winningLine[2]);
-        const endPos = { x, y };
-
-        this.canvas.renderWinningLine(
-          Number(startPos.x),
-          Number(startPos.y),
-          Number(endPos.x),
-          Number(endPos.y)
-        );
+        const [startX, startY] = GridHelper.fromSquareId(winningLine[0]);
+        const [endX, endY] = GridHelper.fromSquareId(winningLine[2]);
+        this.canvas.renderWinningLine(startX, startY, endX, endY);
       }
     } catch (e) {
       /* noop */
