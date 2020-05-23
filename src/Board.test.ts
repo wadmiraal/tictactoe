@@ -11,16 +11,6 @@ it("can get/set square values", () => {
   expect(board.getSquare(8)).toBe("O");
 
   expect(() => {
-    // Out of bounds.
-    board.setSquare(10);
-  }).toThrow();
-
-  expect(() => {
-    // Out of bounds.
-    board.getSquare(-2);
-  }).toThrow();
-
-  expect(() => {
     // Cannot override an existing square.
     board.setSquare(1);
   }).toThrow();
@@ -54,4 +44,10 @@ it("can detect a winning situation", () => {
   expect(board.hasWinner()).toBe(false);
   expect(board.getWinner()).toBeUndefined();
   expect(board.getWinningLine()).toBeUndefined();
+});
+
+it("returns all unplayed squares", () => {
+  const board = new Board();
+  board.setSquare(1).setSquare(2).setSquare(8).setSquare(9);
+  expect(board.getAvailableSquares()).toEqual([3, 4, 5, 6, 7]);
 });

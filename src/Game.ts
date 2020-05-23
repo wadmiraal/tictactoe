@@ -2,6 +2,7 @@ import AI from "./AI";
 import Board from "./Board";
 import Canvas from "./Canvas";
 import GridHelper from "./GridHelper";
+import { GridPos } from "./types";
 
 export default class Game {
   private ai?: AI;
@@ -16,10 +17,10 @@ export default class Game {
     this.canvas.renderGrid();
   }
 
-  handleClick(x: number, y: number) {
+  handleClick(x: GridPos, y: GridPos) {
     if (
       this.board.hasWinner() ||
-      GridHelper.getAvailableSquareIds(this.board).length === 0
+      this.board.getAvailableSquares().length === 0
     ) {
       this.reset();
       return;
@@ -32,7 +33,7 @@ export default class Game {
     }
   }
 
-  private chooseSquare(x: number, y: number) {
+  private chooseSquare(x: GridPos, y: GridPos) {
     try {
       this.board.setSquare(GridHelper.toSquareId(x, y));
       const squareValue = this.board.getSquare(GridHelper.toSquareId(x, y));

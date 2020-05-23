@@ -1,5 +1,5 @@
 import Board from "./Board";
-import GridHelper from "./GridHelper";
+import { SquareId } from "./types";
 
 export default class AI {
   private board: Board;
@@ -8,9 +8,9 @@ export default class AI {
     this.board = board;
   }
 
-  pickSquare(): number {
+  pickSquare(): SquareId {
     // Pick randomly for now.
-    const available = GridHelper.getAvailableSquareIds(this.board);
+    const available = this.board.getAvailableSquares();
     return available[Math.floor(Math.random() * available.length)];
   }
 }

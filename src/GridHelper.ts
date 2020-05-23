@@ -1,37 +1,24 @@
-import Board from "./Board";
+import { GridPos, SquareId } from "./types";
 
-const GRID = [
+const GRID: SquareId[][] = [
   [1, 2, 3],
   [4, 5, 6],
   [7, 8, 9],
 ];
 
 const GridHelper = {
-  fromSquareId: (squareId: number): [number, number] => {
+  fromSquareId: (squareId: SquareId): [GridPos, GridPos] => {
     for (const y in GRID) {
       for (const x in GRID[y]) {
         if (GRID[y][x] === squareId) {
-          return [Number(x), Number(y)];
+          return [Number(x) as GridPos, Number(y) as GridPos];
         }
       }
     }
   },
 
-  toSquareId: (x: number, y: number) => {
+  toSquareId: (x: GridPos, y: GridPos) => {
     return GRID[y][x];
-  },
-
-  getAvailableSquareIds: (board: Board) => {
-    const available = [];
-    for (const y in GRID) {
-      for (const x in GRID[y]) {
-        const squareId = GRID[y][x];
-        if (board.getSquare(squareId) === undefined) {
-          available.push(squareId);
-        }
-      }
-    }
-    return available;
   },
 };
 

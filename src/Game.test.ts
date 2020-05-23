@@ -21,6 +21,7 @@ it("correctly handles clicking squares", () => {
   const boardMock = (Board as jest.Mock).mock.instances[0];
   const canvasMock = (Canvas as jest.Mock).mock.instances[0];
 
+  boardMock.getAvailableSquares = jest.fn(() => [2, 3]);
   boardMock.getSquare = jest.fn((id: number) => {
     if (id === 1) {
       return "X";
@@ -42,8 +43,10 @@ it("correctly handles clicking squares", () => {
 it("correctly handles AI turn", () => {
   const game = new Game(document.createElement("div"), true);
   const spy = jest.spyOn<any, any>(game, "chooseSquare");
+  const boardMock = (Board as jest.Mock).mock.instances[0];
   const aiMock = (AI as jest.Mock).mock.instances[0];
 
+  boardMock.getAvailableSquares = jest.fn(() => [2, 3]);
   aiMock.pickSquare = jest.fn(() => 1);
   game.handleClick(1, 1);
   expect(aiMock.pickSquare).toHaveBeenCalled();
@@ -57,6 +60,7 @@ it("correctly handles winning conditions", () => {
   const canvasMock = (Canvas as jest.Mock).mock.instances[0];
 
   let hasWinner = false;
+  boardMock.getAvailableSquares = jest.fn(() => [2, 3]);
   boardMock.hasWinner = jest.fn(() => {
     hasWinner = !hasWinner;
     return !hasWinner;
@@ -85,7 +89,7 @@ it("correctly resets if game is a draw", () => {
   const boardMock = (Board as jest.Mock).mock.instances[0];
   const canvasMock = (Canvas as jest.Mock).mock.instances[0];
 
-  boardMock.getSquare = jest.fn(() => "X");
+  boardMock.getAvailableSquares = jest.fn(() => []);
   game.handleClick(0, 0);
   expect(boardMock.reset).toHaveBeenCalled();
   expect(canvasMock.reset).toHaveBeenCalled();

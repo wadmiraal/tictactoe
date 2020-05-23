@@ -1,3 +1,5 @@
+import { GridPos } from "./types";
+
 const GRID_SIZE = 100;
 const PADDING = 10;
 
@@ -5,14 +7,14 @@ export default class Canvas {
   private element: HTMLElement;
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
-  private onClickCallback: (x: number, y: number) => void;
+  private onClickCallback: (x: GridPos, y: GridPos) => void;
 
   constructor(element: HTMLElement) {
     this.element = element;
     this.init();
   }
 
-  onClick(onClickCallback: (x: number, y: number) => void) {
+  onClick(onClickCallback: (x: GridPos, y: GridPos) => void) {
     this.onClickCallback = onClickCallback;
   }
 
@@ -26,13 +28,13 @@ export default class Canvas {
     this.context.strokeStyle = "black";
     for (let y = 0; y < 3; y++) {
       for (let x = 0; x < 3; x++) {
-        const [xPos, yPos] = this.getPositions(x, y);
+        const [xPos, yPos] = this.getPositions(x as GridPos, y as GridPos);
         this.context.strokeRect(xPos + 1, yPos + 1, GRID_SIZE, GRID_SIZE);
       }
     }
   }
 
-  renderCircle(x: number, y: number) {
+  renderCircle(x: GridPos, y: GridPos) {
     const [xPos, yPos] = this.getPositions(x, y);
 
     const radius = (GRID_SIZE - PADDING * 2) / 2;
@@ -50,7 +52,7 @@ export default class Canvas {
     this.context.closePath();
   }
 
-  renderCross(x: number, y: number) {
+  renderCross(x: GridPos, y: GridPos) {
     const [xPos, yPos] = this.getPositions(x, y);
 
     const xLineStartPos = xPos + PADDING;
@@ -70,10 +72,10 @@ export default class Canvas {
   }
 
   renderWinningLine(
-    startX: number,
-    startY: number,
-    endX: number,
-    endY: number
+    startX: GridPos,
+    startY: GridPos,
+    endX: GridPos,
+    endY: GridPos
   ) {
     const halfGridSize = GRID_SIZE / 2;
     const xLineStartPos = Number(startX) * GRID_SIZE + halfGridSize;
@@ -101,13 +103,17 @@ export default class Canvas {
 
   private handleClick(e: MouseEvent) {
     if (this.onClickCallback) {
-      const x = Math.floor((e.clientX - this.canvas.offsetLeft) / GRID_SIZE);
-      const y = Math.floor((e.clientY - this.canvas.offsetTop) / GRID_SIZE);
+      const x = Math.floor(
+        (e.clientX - this.canvas.offsetLeft) / GRID_SIZE
+      ) as GridPos;
+      const y = Math.floor(
+        (e.clientY - this.canvas.offsetTop) / GRID_SIZE
+      ) as GridPos;
       this.onClickCallback(x, y);
     }
   }
 
-  private getPositions(x: number, y: number) {
+  private getPositions(x: GridPos, y: GridPos) {
     return [Number(x) * GRID_SIZE, Number(y) * GRID_SIZE];
   }
 }
