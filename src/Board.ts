@@ -1,15 +1,18 @@
 import { Player, SquareId } from "./types";
 
+type Squares = { [x in SquareId]?: Player };
+
 export default class Board {
-  private squares: { [x in SquareId]?: Player };
+  private squares: Squares;
   private lastPlayer: Player;
   private winningLine?: SquareId[];
 
-  constructor() {
-    this.initSquares();
+  constructor(squares?: Squares, lastPlayer?: Player) {
+    this.initSquares(squares);
+    this.lastPlayer = lastPlayer;
   }
 
-  private initSquares() {
+  private initSquares(squares?: Squares) {
     this.squares = {
       1: undefined,
       2: undefined,
@@ -20,17 +23,16 @@ export default class Board {
       7: undefined,
       8: undefined,
       9: undefined,
+      ...squares,
     };
   }
 
-  getCurrentPlayer() {
-    let nextValue: Player;
-    if (this.lastPlayer === undefined) {
-      nextValue = "X";
-    } else {
-      nextValue = this.lastPlayer === "X" ? "O" : "X";
-    }
-    return (this.lastPlayer = nextValue);
+  clone() {
+    return new Board({ ...this.squares }, this.lastPlayer);
+  }
+
+  getLastPlayer() {
+    return this.lastPlayer;
   }
 
   getSquare(n: SquareId): Player | undefined {
@@ -51,6 +53,9 @@ export default class Board {
       [1, 2, 3],
       [4, 5, 6],
       [7, 8, 9],
+      [1, 4, 7],
+      [2, 5, 8],
+      [3, 6, 9],
       [1, 5, 9],
       [7, 5, 3],
     ];
@@ -116,5 +121,15 @@ export default class Board {
     this.winningLine = undefined;
     this.lastPlayer = undefined;
     return this;
+  }
+
+  private getCurrentPlayer() {
+    let currentPlayer: Player;
+    if (this.lastPlayer === undefined) {
+      currentPlayer = "X";
+    } else {
+      currentPlayer = this.lastPlayer === "X" ? "O" : "X";
+    }
+    return (this.lastPlayer = currentPlayer);
   }
 }

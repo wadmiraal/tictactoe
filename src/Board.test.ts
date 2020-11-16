@@ -51,3 +51,19 @@ it("returns all unplayed squares", () => {
   board.setSquare(1).setSquare(2).setSquare(8).setSquare(9);
   expect(board.getAvailableSquares()).toEqual([3, 4, 5, 6, 7]);
 });
+
+it("can return the last player", () => {
+  const board = new Board();
+  expect(board.getLastPlayer()).toBeUndefined();
+  board.setSquare(1);
+  expect(board.getLastPlayer()).toBe("X");
+  board.setSquare(2);
+  expect(board.getLastPlayer()).toBe("O");
+});
+
+it("can clone itself", () => {
+  const boardA = new Board();
+  boardA.setSquare(1);
+  const boardB = boardA.clone();
+  expect(boardA.getAvailableSquares()).toEqual(boardB.getAvailableSquares());
+});

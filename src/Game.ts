@@ -1,20 +1,23 @@
-import AI from "./AI";
+import Ai from "./Ai";
 import Board from "./Board";
 import Canvas from "./Canvas";
 import GridHelper from "./GridHelper";
 import { GridPos } from "./types";
 
 export default class Game {
-  private ai?: AI;
+  private ai?: Ai;
   private board: Board;
   private canvas: Canvas;
 
-  constructor(element: HTMLElement, againstAI = false) {
+  constructor(element: HTMLElement, againstAI = true) {
     this.board = new Board();
-    this.ai = againstAI ? new AI(this.board) : undefined;
+    this.ai = againstAI ? new Ai(this.board) : undefined;
     this.canvas = new Canvas(element);
     this.canvas.onClick(this.handleClick.bind(this));
     this.canvas.renderGrid();
+
+    // Ai starts?
+    this.chooseSquare(...GridHelper.fromSquareId(this.ai.pickSquare()));
   }
 
   handleClick(x: GridPos, y: GridPos) {
@@ -28,7 +31,11 @@ export default class Game {
 
     this.chooseSquare(x, y);
 
-    if (this.ai) {
+    if (
+      !this.board.hasWinner() &&
+      this.board.getAvailableSquares().length > 0 &&
+      this.ai
+    ) {
       this.chooseSquare(...GridHelper.fromSquareId(this.ai.pickSquare()));
     }
   }
