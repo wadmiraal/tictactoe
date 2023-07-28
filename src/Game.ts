@@ -20,6 +20,18 @@ export default class Game {
     this.chooseSquare(...GridHelper.fromSquareId(this.ai.pickSquare()));
   }
 
+  getBoard() {
+    return this.board;
+  }
+
+  getAi() {
+    if (this.ai) {
+      return this.ai;
+    } else {
+      throw new Error("AI not defined for this game.");
+    }
+  }
+
   handleClick(x: GridPos, y: GridPos) {
     if (
       this.board.hasWinner() ||
@@ -57,7 +69,7 @@ export default class Game {
         this.canvas.renderWinningLine(startX, startY, endX, endY);
       }
     } catch (e) {
-      /* noop */
+      console.error(e);
     }
   }
 

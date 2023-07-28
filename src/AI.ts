@@ -40,15 +40,14 @@ export default class Ai {
     // If last player is O, we're X. And vice-versa.
     const isX = this.board.getLastPlayer() === "O";
     const desiredSolution = isX ? AiSolution.XWins : AiSolution.OWins;
-    const possibleTuples: [
-      SquareId,
-      AiSolution
-    ][] = this.board.getAvailableSquares().map((squareId) => {
-      return [
-        squareId,
-        this.minimax(this.board.clone().setSquare(squareId), !isX),
-      ];
-    });
+    const possibleTuples: [SquareId, AiSolution][] = this.board
+      .getAvailableSquares()
+      .map((squareId) => {
+        return [
+          squareId,
+          this.minimax(this.board.clone().setSquare(squareId), !isX),
+        ];
+      });
 
     // If there's a winning solution, choose it.
     pick = possibleTuples.find(([_, solution]) => solution === desiredSolution);
